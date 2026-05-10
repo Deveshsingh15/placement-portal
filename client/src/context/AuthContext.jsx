@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await API.post('/auth/login', data);
       saveAuth(res.data.token, res.data.user);
-      toast.success(`Welcome back, ${res.data.user.name.split(' ')[0]}!`);
+      toast.success('Login successful!');
       return { success: true, role: res.data.user.role };
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
