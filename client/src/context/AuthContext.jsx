@@ -7,26 +7,37 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('user')) || null; } catch { return null; }
+    try {
+      const stored = localStorage.getItem('user');
+      if (!stored || stored === 'undefined') return null;
+      return JSON.parse(stored);
+    } catch {
+      return null;
+    }
   });
   const [loading, setLoading] = useState(false);
 
   const saveAuth = (token, userData) => {
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData || null));
+    setUser(userData || null);
   };
 
   const register = async (data) => {
     setLoading(true);
     try {
       const res = await API.post('/auth/register', data);
+      if (!res.data?.success || !res.data?.token || !res.data?.user) {
+        console.error('[AuthContext.register] unexpected response:', res.data);
+        throw new Error(res.data?.message || 'Registration failed');
+      }
       saveAuth(res.data.token, res.data.user);
       toast.success('Account created successfully!');
       return { success: true };
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed');
-      return { success: false };
+      const message = err.response?.data?.message || err.message || 'Registration failed';
+      toast.error(message);
+      return { success: false, message };
     } finally { setLoading(false); }
   };
 
@@ -34,12 +45,17 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await API.post('/auth/login', data);
+      if (!res.data?.success || !res.data?.token || !res.data?.user) {
+        console.error('[AuthContext.login] unexpected response:', res.data);
+        throw new Error(res.data?.message || 'Login failed');
+      }
       saveAuth(res.data.token, res.data.user);
       toast.success('Login successful!');
       return { success: true, role: res.data.user.role };
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
-      return { success: false };
+      const message = err.response?.data?.message || err.message || 'Login failed';
+      toast.error(message);
+      return { success: false, message };
     } finally { setLoading(false); }
   };
 
@@ -47,12 +63,17 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await API.post('/auth/admin/login', data);
+      if (!res.data?.success || !res.data?.token || !res.data?.user) {
+        console.error('[AuthContext.adminLogin] unexpected response:', res.data);
+        throw new Error(res.data?.message || 'Admin login failed');
+      }
       saveAuth(res.data.token, res.data.user);
       toast.success('Admin logged in!');
       return { success: true };
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Admin login failed');
-      return { success: false };
+      const message = err.response?.data?.message || err.message || 'Admin login failed';
+      toast.error(message);
+      return { success: false, message };
     } finally { setLoading(false); }
   };
 

@@ -8,14 +8,38 @@ const connectDB = require('./config/db');
 
 const app = express();
 
+// Validate required environment variables for auth and database
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET', 'ADMIN_SECRET'];
+const missingEnvVars = requiredEnvVars.filter((name) => !process.env[name]);
+if (missingEnvVars.length) {
+  console.error(`❌ Missing required env vars: ${missingEnvVars.join(', ')}`);
+}
+console.log(`CLIENT_URL=${process.env.CLIENT_URL || 'not set'}`);
+
 // Connect to database
 connectDB();
 
 // Middleware
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:3000'].filter(Boolean);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    const message = `CORS policy: Origin ${origin} is not allowed. Set CLIENT_URL in server env or add your frontend host to allowedOrigins.`;
+    console.warn(message);
+    return callback(new Error(message), false);
+  },
   credentials: true,
-}));
+};
+
+if (!process.env.CLIENT_URL && process.env.NODE_ENV === 'production') {
+  console.warn('WARNING: CLIENT_URL is not configured. Production frontend origins may be blocked by CORS.');
+}
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
