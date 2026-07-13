@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: placement-portal
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    plan: free
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        scope: shared
+      - key: JWT_SECRET
+        scope: shared
+      - key: ADMIN_SECRET
+        scope: shared
+      - key: CLIENT_URL
+        scope: shared

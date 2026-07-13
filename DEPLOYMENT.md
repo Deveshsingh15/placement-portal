@@ -13,8 +13,16 @@ docker compose up --build
 3. App will be available at http://localhost:5000 (server) and the client will be served from the built files.
 
 Environment variables
-- Copy `.env.example` to `.env` in project root or set env vars in your hosting platform.
+- Copy `.env.example` to `.env` in the project root when using Docker Compose, or set these env vars directly in your production platform.
+- If you run the backend manually from `server/`, copy `server/.env.example` to `server/.env`.
 - Required: `MONGO_URI`, `JWT_SECRET`, `ADMIN_SECRET`, `NODE_ENV=production`, `PORT` (optional), `CLIENT_URL`.
+
+Production env tips
+- `MONGO_URI` should point to your production MongoDB instance
+- `JWT_SECRET` must be a strong, random secret
+- `ADMIN_SECRET` must differ from the default sample value
+- `CLIENT_URL` should be the deployed frontend origin, not `http://localhost:5173`
+- Keep `.env` out of source control; use the existing root `.gitignore` to ignore it
 
 Option B — GitHub Container Registry + Cloud host (recommended for production)
 

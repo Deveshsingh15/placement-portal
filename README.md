@@ -124,12 +124,20 @@ npm install
 
 ### 2. Configure Environment Variables
 
+For local backend development, copy the server sample env file into the server folder:
+
 ```bash
 cd server
 cp .env.example .env
 ```
 
-Edit `.env`:
+For Docker Compose or production deployment, copy the root sample env file into the project root:
+
+```bash
+cp .env.example .env
+```
+
+Edit the env file and set production-ready values:
 
 ```env
 PORT=5000
@@ -137,8 +145,15 @@ MONGO_URI=mongodb://localhost:27017/placement_portal
 JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 JWT_EXPIRE=7d
 ADMIN_SECRET=my_admin_secret_key
+CLIENT_URL=http://localhost:5173
 NODE_ENV=development
 ```
+
+- `MONGO_URI` should point to your production MongoDB instance in deployment.
+- `JWT_SECRET` must be a strong, unguessable secret.
+- `ADMIN_SECRET` must be changed from the default value before using admin create/login.
+- `CLIENT_URL` should match the frontend origin in production.
+- For local development, `NODE_ENV=development` is fine; for production, set `NODE_ENV=production`.
 
 > For **MongoDB Atlas**, replace `MONGO_URI` with your Atlas connection string:
 > `mongodb+srv://<user>:<password>@cluster.mongodb.net/placement_portal`
@@ -254,19 +269,44 @@ Open **http://localhost:5173** in your browser.
 
 ## 🌐 Deployment
 
-### Frontend (Vercel)
+### Docker Compose (recommended for local/pre-production)
+1. Create a root `.env` file from `.env.example` and set your production env values.
+2. Install Docker Desktop.
+3. Run from the project root:
+
+```bash
+docker compose up --build
+```
+
+This starts the `mongo` service and the app service together. The backend uses the built `client/dist` files, and the frontend is served from the Node server.
+
+### Frontend (Vercel / Netlify)
 ```bash
 cd client
 npm run build
-# Deploy the dist/ folder to Vercel
+# Deploy the dist/ folder to Vercel or Netlify
 ```
-Set environment: no env vars needed (API calls go through proxy in dev; set `VITE_API_URL` for production and update `api.js` baseURL).
 
-### Backend (Railway / Render)
-1. Push the `server/` folder to a Git repo
-2. Set all `.env` variables in the platform dashboard
+Set environment: if deploying separate frontend, set `VITE_API_URL` to the backend URL in production and update `client/src/utils/api.js` if needed.
+
+### Backend (Railway / Render / Heroku)
+1. Push the repository to GitHub
+2. Configure environment variables in your host dashboard:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `ADMIN_SECRET`
+   - `CLIENT_URL`
+   - `NODE_ENV=production`
 3. Set start command: `node index.js`
-4. Use MongoDB Atlas for cloud database
+4. Use MongoDB Atlas or another cloud MongoDB provider for production storage.
+
+### Production environment checklist
+- `MONGO_URI` points to your production database
+- `JWT_SECRET` is a secure strong secret
+- `ADMIN_SECRET` is changed from defaults
+- `CLIENT_URL` is set to the deployed frontend origin
+- `NODE_ENV=production`
+- Do not commit `.env` or secrets into Git
 
 ---
 

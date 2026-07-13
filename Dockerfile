@@ -4,11 +4,9 @@
 FROM node:20-alpine AS client-build
 WORKDIR /app/client
 COPY client/package*.json ./
-COPY client/vite.config.js ./
-COPY client/postcss.config.js ./ || true
-COPY client/tailwind.config.js ./ || true
 RUN npm ci --silent
 COPY client/ ./
+ENV VITE_API_URL=/api
 RUN npm run build
 
 # Stage 2 - build server

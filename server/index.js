@@ -55,6 +55,11 @@ app.use('/api/questions', require('./routes/questions'));
 app.use('/api/resume', require('./routes/resume'));
 app.use('/api/admin', require('./routes/admin'));
 
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, message: 'Placement Portal API is running 🚀', timestamp: new Date() });
+});
+
 // Serve client in production when a build is available
 const possibleClientPaths = [
   path.join(__dirname, 'client', 'dist'),
@@ -69,11 +74,6 @@ if (clientDist) {
   });
 }
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'Placement Portal API is running 🚀', timestamp: new Date() });
-});
-
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -84,7 +84,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
   console.log(`📡 API: http://localhost:${PORT}/api/health\n`);
 });
