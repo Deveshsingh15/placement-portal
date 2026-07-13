@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
+const fs = require('fs');
 const connectDB = require('./config/db');
 
 const app = express();
@@ -53,6 +54,20 @@ app.use('/api/dsa', require('./routes/dsa'));
 app.use('/api/questions', require('./routes/questions'));
 app.use('/api/resume', require('./routes/resume'));
 app.use('/api/admin', require('./routes/admin'));
+
+// Serve client in production when a build is available
+const possibleClientPaths = [
+  path.join(__dirname, 'client', 'dist'),
+  path.join(__dirname, '..', 'client', 'dist'),
+];
+const clientDist = possibleClientPaths.find((p) => fs.existsSync(p));
+if (clientDist) {
+  console.log(`Serving static client from ${clientDist}`);
+  app.use(express.static(clientDist));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
 
 // Health check
 app.get('/api/health', (req, res) => {
