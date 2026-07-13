@@ -33,3 +33,17 @@ If you want, I can:
 - Configure S3 uploads and add secrets handling instructions.
 
 Tell me which option you want me to finish now and I'll proceed.
+
+Option D — Deploy to Render (automatic via GitHub Actions)
+
+1. Create a Web Service on Render and connect it to this GitHub repository, or plan to use the Render Docker deploy flow.
+2. Get a Render API key: go to https://dashboard.render.com/account/api-keys and create a key.
+3. Get your Render service ID: open your service in Render and note the service id from the URL (it looks like `srv-xxxxxxxx`).
+4. In your GitHub repository, add two secrets: `RENDER_API_KEY` (value from step 2) and `RENDER_SERVICE_ID` (value from step 3).
+5. Push to `main`; the workflow `.github/workflows/deploy-to-render.yml` will POST to the Render API to trigger a deploy.
+
+Notes:
+- The workflow uses the Render `/services/:serviceId/deploys` endpoint. Ensure your service is configured to deploy from GitHub or to accept manual deploys via the API.
+- If you prefer an integrated approach, you can configure Render to auto-deploy on GitHub pushes (recommended) and skip the API trigger.
+
+If you want, I can also add a workflow step to wait and report the Render deploy status back to the Actions logs.
